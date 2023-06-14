@@ -4,7 +4,9 @@
 
 package db
 
-import ()
+import (
+	"time"
+)
 
 type Actor struct {
 	ID          int64  `json:"id"`
@@ -45,4 +47,13 @@ type Performance struct {
 	ActorID int32 `json:"actor_id"`
 	MovieID int32 `json:"movie_id"`
 	Year    int32 `json:"year"`
+}
+
+type User struct {
+	Username            string    `json:"username"`
+	Password            string    `json:"password"`
+	Fullname            string    `json:"fullname"`
+	Email               string    `json:"email"`
+	PasswordLastChanged time.Time `json:"password_last_changed"`
+	CreatedAt           time.Time `json:"created_at"`
 }

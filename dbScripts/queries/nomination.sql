@@ -1,5 +1,5 @@
 -- name: CreateNomination :one
-INSERT INTO nominations("movie_id", "award_id", "year", "is_winner") VALUES ($1, $2, $3, $4) RETURNING id;
+INSERT INTO nominations("movie_id", "award_id", "year", "is_winner") VALUES ($1, $2, $3, $4) RETURNING *;
 -- 
 -- name: GetNomination :one
 SELECT * FROM nominations WHERE id = $1 LIMIT 1;

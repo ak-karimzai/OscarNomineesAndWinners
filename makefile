@@ -4,6 +4,7 @@ host := localhost
 port := 5432
 dbname := test
 docker-container := psql-dev
+BINARY_NAME := oscar
 
 createdb:
 	sudo docker exec -it ${docker-container} createdb --username=${username}  --owner=${username} ${dbname}
@@ -23,4 +24,29 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: createdb dropdb migrateup migratedown sqlc
+build:
+	@echo "Building back end..."
+	go build -o ${BINARY_NAME} main.go
+	@echo "Binary built!"
+
+run: build
+	@echo "Starting back end..."
+	@env ./${BINARY_NAME} &
+	@echo "Back end started!"
+
+clean:
+	@echo "Cleaning..."
+	@go clean
+	@rm ${BINARY_NAME}
+	@echo "Cleaned!"
+
+start: run
+
+stop:
+	@echo "Stopping back end..."
+	@-pkill -SIGTERM -f "./${BINARY_NAME}"
+	@echo "Stopped back end!"
+
+restart: stop start
+
+.PHONY: createdb dropdb migrateup migratedown sqlc run clean start stop restart

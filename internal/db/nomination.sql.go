@@ -10,7 +10,7 @@ import (
 )
 
 const createNomination = `-- name: CreateNomination :one
-INSERT INTO nominations("movie_id", "award_id", "year", "is_winner") VALUES ($1, $2, $3, $4) RETURNING id
+INSERT INTO nominations("movie_id", "award_id", "year", "is_winner") VALUES ($1, $2, $3, $4) RETURNING id, movie_id, award_id, year, is_winner
 `
 
 type CreateNominationParams struct {
@@ -20,16 +20,22 @@ type CreateNominationParams struct {
 	IsWinner bool  `json:"is_winner"`
 }
 
-func (q *Queries) CreateNomination(ctx context.Context, arg CreateNominationParams) (int64, error) {
+func (q *Queries) CreateNomination(ctx context.Context, arg CreateNominationParams) (Nomination, error) {
 	row := q.db.QueryRowContext(ctx, createNomination,
 		arg.MovieID,
 		arg.AwardID,
 		arg.Year,
 		arg.IsWinner,
 	)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+	var i Nomination
+	err := row.Scan(
+		&i.ID,
+		&i.MovieID,
+		&i.AwardID,
+		&i.Year,
+		&i.IsWinner,
+	)
+	return i, err
 }
 
 const deleteNomination = `-- name: DeleteNomination :exec

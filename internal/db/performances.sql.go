@@ -46,3 +46,61 @@ func (q *Queries) GetPerformance(ctx context.Context, id int64) (Performance, er
 	)
 	return i, err
 }
+
+const listPerformances = `-- name: ListPerformances :many
+SELECT id, actor_id, movie_id, year FROM performances LIMIT $1 OFFSET  $2
+`
+
+type ListPerformancesParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListPerformances(ctx context.Context, arg ListPerformancesParams) ([]Performance, error) {
+	rows, err := q.db.QueryContext(ctx, listPerformances, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Performance{}
+	for rows.Next() {
+		var i Performance
+		if err := rows.Scan(
+			&i.ID,
+			&i.ActorID,
+			&i.MovieID,
+			&i.Year,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePerformance = `-- name: UpdatePerformance :exec
+UPDATE performances SET actor_id = $2, movie_id = $3, year = $4 WHERE id = $1
+`
+
+type UpdatePerformanceParams struct {
+	ID      int64 `json:"id"`
+	ActorID int32 `json:"actor_id"`
+	MovieID int32 `json:"movie_id"`
+	Year    int32 `json:"year"`
+}
+
+func (q *Queries) UpdatePerformance(ctx context.Context, arg UpdatePerformanceParams) error {
+	_, err := q.db.ExecContext(ctx, updatePerformance,
+		arg.ID,
+		arg.ActorID,
+		arg.MovieID,
+		arg.Year,
+	)
+	return err
+}
