@@ -1,0 +1,49 @@
+Project Oscar_nominees_and_winners {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # Oscar nominees and winners
+    **markdown content here**
+  '''
+}
+
+Table movies as M {
+  id bigserial [pk]
+  title varchar [not null]
+  release_year integer [not null]
+  director varchar [not null]
+  genre varchar [not null]
+}
+
+Table actors as AC {
+  id bigserial [pk]
+  name varchar [not null]
+  birth_year integer [not null]
+  nationality varchar [not null]
+}
+
+Table awards as AW {
+  id bigserial [pk]
+  name varchar [not null]
+  category varchar [not null]
+}
+
+Table nominations as N {
+  id bigserial [pk]
+  movie_id int [not null, ref: > M.id]
+  award_id int [not null, ref: > AW.id]
+  year integer [not null]
+  is_winner boolean [not null]
+}
+
+Table performances as P {
+  id bigserial [pk]
+  actor_id int [not null, ref: > AC.id]
+  movie_id int [not null, ref: > M.id]
+  year int [not null]
+}
+
+Table nominated_performances as NP {
+  nomination_id int [pk, ref: > N.id]
+  performance_id int [pk, ref: > P.id]
+}
+
